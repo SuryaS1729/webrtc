@@ -1,6 +1,8 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 export function Sender(){
+
+  const [socket, setSocket] = useState<WebSocket | null>(null)
 
 
     useEffect(()=>{
@@ -12,6 +14,16 @@ export function Sender(){
     },[])
 
 
+        async function startSendingVideo(){
+          //create a video 
+          const pc = new RTCPeerConnection()
+          const offer = await pc.createOffer()
+          await pc.setLocalDescription(offer)
+          
+        }
+
+
+
 
 
 
@@ -21,7 +33,7 @@ export function Sender(){
 
 
 
-
+    <button onClick={startSendingVideo}>send video</button>
 
 
     sender
