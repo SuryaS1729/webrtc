@@ -19,6 +19,7 @@ export function Sender(){
           const pc = new RTCPeerConnection()
           const offer = await pc.createOffer()
           await pc.setLocalDescription(offer)
+          socket?.send(JSON.stringify({type:'createOffer', sdp:pc.localDescription}))
           
         }
 
