@@ -45,8 +45,9 @@ export function Sender(){
               pc.addIceCandidate(data.candidate)
             }
           }
-          const stream =  await navigator.mediaDevices.getUserMedia({video:true, audio:false})
-          pc.addTrack(stream.getVideoTracks()[0], stream)
+          const stream =  await navigator.mediaDevices.getUserMedia({video:true, audio:true})
+          pc.addTrack(stream.getVideoTracks()[0])
+          // pc.addTrack(stream.getAudioTracks()[0])
           
         }
 

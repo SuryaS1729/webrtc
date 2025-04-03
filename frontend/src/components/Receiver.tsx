@@ -1,63 +1,48 @@
 import { useEffect } from "react"
 
-export function Receiver(){
 
+export const Receiver = () => {
+    
+    useEffect(() => {
+        const socket = new WebSocket('ws://localhost:8080');
+        socket.onopen = () => {
+            socket.send(JSON.stringify({
+                type: 'receiver'
+            }));
+        }
+        startReceiving(socket);
+    }, []);
 
-    useEffect(()=>{
-        const socket = new WebSocket('ws://localhost:8080')
+    function startReceiving(socket: WebSocket) {
+        const video = document.createElement('video');
+        document.body.appendChild(video);
 
-         socket.onopen=()=>{
-          socket.send(JSON.stringify({type:"receiver"}))
-         }
+        const pc = new RTCPeerConnection();
+        pc.ontrack = (event) => {
+            video.srcObject = new MediaStream([event.track]);
+            video.muted = true
+            video.play();
+        }
 
-         socket.onmessage= async (event)=>{
-          const message = JSON.parse(event.data)
-          let pc:RTCPeerConnection | null = null
-          console.log(message)
-          if(message.type === 'createOffer'){
-             pc = new RTCPeerConnection()
-            pc.setRemoteDescription(message.sdp)
-
-            pc.onicecandidate = (event)=>{
-              console.log(event )
-              if(event.candidate){
-                socket?.send(JSON.stringify({type:'iceCandidate', candidate:event.candidate}))
-              }}
-
-              pc.ontrack = (track)=>{
-                console.log(track)
-
-              }
-
-
-            const answer = await pc.createAnswer()
-            await pc.setLocalDescription(answer)
-            socket.send(JSON.stringify({type:'createAnswer', sdp:pc.localDescription}))
-            
-          }else if (message.type ==='iceCandidate'){
-            if(pc!==null){
-              //@ts-ignore
-              pc.addIceCandidate(message.candidate)
+        socket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            if (message.type === 'createOffer') {
+                pc.setRemoteDescription(message.sdp).then(() => {
+                    pc.createAnswer().then((answer) => {
+                        pc.setLocalDescription(answer);
+                        socket.send(JSON.stringify({
+                            type: 'createAnswer',
+                            sdp: answer
+                        }));
+                    });
+                });
+            } else if (message.type === 'iceCandidate') {
+                pc.addIceCandidate(message.candidate);
             }
-            
-            
-          }
-         }
-    },[])
+        }
+    }
 
-     
-
-
-
-  return <div> 
-
-
-
-
-
-
-
-
-    receiver
-  </div>
+    return <div>  
+        receiver
+    </div>
 }
