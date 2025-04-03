@@ -24,6 +24,12 @@ export function Receiver(){
                 socket?.send(JSON.stringify({type:'iceCandidate', candidate:event.candidate}))
               }}
 
+              pc.ontrack = (track)=>{
+                console.log(track)
+
+              }
+
+
             const answer = await pc.createAnswer()
             await pc.setLocalDescription(answer)
             socket.send(JSON.stringify({type:'createAnswer', sdp:pc.localDescription}))
